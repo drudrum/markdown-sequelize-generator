@@ -165,12 +165,13 @@ function create(sequelize, samples) {
       var _type = association.target.name;
       var fkAttributes = association.target.rawAttributes[association.foreignKey];
       var allowNull = fkAttributes ? fkAttributes.allowNull : false;
+      const link = `model-${_type}`
       if (isAssocAnArray(association.associationType)) {
         _type += '[]';
       } else if (allowNull) {
         associationName = '[' + associationName + ']';
       }
-      p.print(`* ${associationName}: [${_type}](#model-${_type}).`)
+      p.print(`* ${associationName}: [${_type}](#${link}).`)
     });
 
     return p.footer().value();

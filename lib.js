@@ -28,17 +28,17 @@ function create(sequelize, samples) {
 
     function print(/* vararg */) {
       var args = [].slice.call(arguments);
-      value += '\n * ' + args.join(' ');
+      value += '\n' + args.join(' ');
       return self;
     }
 
     function header() {
-      value = '/**';
+      value = '\n';
       return self;
     }
 
     function footer() {
-      value += '\n */\n';
+      value += '\n';
       return self;
     }
 
@@ -155,13 +155,11 @@ function create(sequelize, samples) {
   }
 
   function defineDoc(model, type) {
-    var p = printer().header().print('@apiDefine', model.name + type);
+    var p = printer().header().print('## Model:', model.name);
     _.each(model.rawAttributes, function(attr, attrName) {
       if (attr.allowNull) attrName = '[' + attrName + ']';
       var type = (attr.type.key || attr.type).toLowerCase();
-      p.print(
-        '@apiParam', '{' + type + '}', attrName
-      );
+      p.print(`* ${attrName}: type`)
     });
     _.each(model.associations, function(association, associationName) {
       var _type = association.target.name;
@@ -172,7 +170,7 @@ function create(sequelize, samples) {
       } else if (allowNull) {
         associationName = '[' + associationName + ']';
       }
-      p.print('@apiParam', '{' + _type + '}', associationName);
+      p.print(`* ${associationName}: [${_type}](#model-${_type}).`)
     });
 
     return p.footer().value();
@@ -183,13 +181,15 @@ function create(sequelize, samples) {
       obj = [obj];
       name += 'Array';
     }
-    var p = printer().header().print('@apiDefine', name + type);
-    var exampleType = exampleTypes[type];
-    p.print('@api' + exampleType + 'Example {json}', type);
+    var p = printer().header().print('## Example of ', name + type);
+    //var exampleType = exampleTypes[type];
+    //p.print('@api ' + exampleType + ' Example {json}', type);
+    p.print('```')
     var lines = JSON.stringify(obj, null, '  ').split('\n');
     lines.forEach(function(line) {
       p.print('    ' + line);
     });
+    p.print('```')
     return p.footer().value();
   }
 
@@ -205,19 +205,19 @@ function create(sequelize, samples) {
     var name = model.name;
     var obj = createObject(model, options);
 
-    var request = defineExample(name, 'Request', obj, false);
-    var requestArray = defineExample(name, 'Request', obj, true);
+    var request = defineExample(name, '', obj, false);
+    //var requestArray = defineExample(name, ' Request', obj, true);
 
-    var success = defineExample(name, 'Response', obj, false);
-    var successArray = defineExample(name, 'Response', obj, true);
+    //var success = defineExample(name, ' Response', obj, false);
+    //var successArray = defineExample(name, ' Response', obj, true);
 
     var proto = Object.create({ toString: _docToString });
     var doc = _.extend(proto, {
       param: defineDoc(model, 'Param'),
       request: request,
-      requestArray: requestArray,
-      success: success,
-      successArray: successArray
+      //requestArray: requestArray,
+      //success: success,
+      //successArray: successArray
     });
 
     return doc;

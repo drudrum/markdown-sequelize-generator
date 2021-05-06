@@ -157,9 +157,9 @@ function create(sequelize, samples) {
   function defineDoc(model, type) {
     var p = printer().header().print('## Model:', model.name);
     _.each(model.rawAttributes, function(attr, attrName) {
-      if (attr.allowNull) attrName = '[' + attrName + ']';
+      if (attr.allowNull) attrName = '*' + attrName + '*';
       var type = (attr.type.key || attr.type).toLowerCase();
-      p.print(`* ${attrName}: type`)
+      p.print(`* ${attrName}: ${type}`)
     });
     _.each(model.associations, function(association, associationName) {
       var _type = association.target.name;

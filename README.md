@@ -59,7 +59,7 @@ If you already have sequelize model definitions and wish to automatically
 generate documentation of it's models, you can do so easily:
 
 ```javascript
-var docgen = require('apidoc-sequelize-generator');
+var docgen = require('markdown-sequelize-generator');
 var sequelize = require('./path/to/my/sequelize/instance.js');
 
 /*

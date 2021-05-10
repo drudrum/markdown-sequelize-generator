@@ -1,6 +1,6 @@
 {
   "name": "markdown-sequelize-generator",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Automatically generates markdown document from sequelize model definitions",
   "main": "lib.js",
   "scripts": {

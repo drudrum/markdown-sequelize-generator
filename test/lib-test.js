@@ -1,41 +1,41 @@
-'use strict';
-var Sequelize = require('sequelize');
-var expect = require('chai').expect;
-var fs = require('fs');
-var lib = require('../lib.js');
-var path = require('path');
+'use strict'
+const Sequelize = require('sequelize')
+const expect = require('chai').expect
+const fs = require('fs')
+const lib = require('../lib.js')
+const path = require('path')
 
-function createSequelize() {
-  var sequelize = new Sequelize('sqlite://');
+function createSequelize () {
+  const sequelize = new Sequelize('sqlite://')
 
   fs.readdirSync(path.join(__dirname, 'models'))
-  .filter(function(file) { return file.endsWith('.js'); })
-  .forEach(function(file) {
-    sequelize.import(path.join(__dirname, 'models', file));
-  });
+    .filter(function (file) { return file.endsWith('.js') })
+    .forEach(function (file) {
+      require(path.join(__dirname, 'models', file))(sequelize, Sequelize)
+    })
 
-  var parent = sequelize.models.parent;
-  var parentDetails = sequelize.models.parentDetails;
-  var child = sequelize.models.child;
-  var grandchild = sequelize.models.grandchild;
+  const parent = sequelize.models.parent
+  const parentDetails = sequelize.models.parentDetails
+  const child = sequelize.models.child
+  const grandchild = sequelize.models.grandchild
 
-  parent.hasOne(parentDetails);
-  parent.hasMany(child);
-  child.hasMany(grandchild);
+  parent.hasOne(parentDetails)
+  parent.hasMany(child)
+  child.hasMany(grandchild)
 
-  grandchild.belongsTo(parent);
+  grandchild.belongsTo(parent)
 
-  return sequelize;
+  return sequelize
 }
 
-var sequelize;
-beforeEach(function() {
-  sequelize = createSequelize();
-});
+let sequelize
+beforeEach(function () {
+  sequelize = createSequelize()
+})
 
-describe('createObject()', function() {
-  it('should recreate an object tree from sequelize model', function() {
-    var obj = lib(sequelize).createObject(sequelize.models.parent);
+describe('createObject()', function () {
+  it('should recreate an object tree from sequelize model', function () {
+    const obj = lib(sequelize).createObject(sequelize.models.parent)
 
     expect(obj).to.eql({
       id: 1,
@@ -71,18 +71,18 @@ describe('createObject()', function() {
         updatedAt: '2015-12-31T23:59:59.123',
         parentId: 1
       }
-    });
-  });
+    })
+  })
 
-  it('should recreate an object with only specified includes', function() {
-    var obj = lib(sequelize).createObject(sequelize.models.parent, {
+  it('should recreate an object with only specified includes', function () {
+    const obj = lib(sequelize).createObject(sequelize.models.parent, {
       ignoredFields: ['createdAt'],
       include: [{
         model: 'child'
       }, {
         model: 'parentDetails'
       }]
-    });
+    })
 
     expect(obj).to.eql({
       id: 1,
@@ -105,11 +105,11 @@ describe('createObject()', function() {
         updatedAt: '2015-12-31T23:59:59.123',
         parentId: 1
       }
-    });
-  });
+    })
+  })
 
-  it('should recreate an object with only specified includes', function() {
-    var obj = lib(sequelize).createObject(sequelize.models.parent, {
+  it('should recreate an object with only specified includes', function () {
+    const obj = lib(sequelize).createObject(sequelize.models.parent, {
       ignoredFields: ['createdAt', 'updatedAt'],
       include: [{
         model: 'child',
@@ -117,7 +117,7 @@ describe('createObject()', function() {
           model: 'grandchild'
         }]
       }]
-    });
+    })
 
     expect(obj).to.eql({
       id: 1,
@@ -136,39 +136,36 @@ describe('createObject()', function() {
           grandParentId: 1,
           id: 1,
           name: 'string',
-          parentId: 1,
+          parentId: 1
         }]
-      }],
-    });
-  });
+      }]
+    })
+  })
+})
 
-});
-
-describe('defineDoc()', function() {
-  it('should create @apiDefine with @apiParams', function() {
-    var doc = lib(sequelize).defineDoc(sequelize.models.parent, 'Param');
+describe('defineDoc()', function () {
+  it('should create head and props list', function () {
+    const doc = lib(sequelize).defineDoc(sequelize.models.parent, 'Param')
     expect(doc).to.equal(
-      '/**\n' +
-      ' * @apiDefine parentParam\n' +
-      ' * @apiParam {bigint} id\n' +
-      ' * @apiParam {uuid} uuid\n' +
-      ' * @apiParam {string} name\n' +
-      ' * @apiParam {integer} [count]\n' +
-      ' * @apiParam {enum} category\n' +
-      ' * @apiParam {date} birthday\n' +
-      ' * @apiParam {date} createdAt\n' +
-      ' * @apiParam {date} updatedAt\n' +
-      ' * @apiParam {bigint} [parentDetailsId]\n' +
-      ' * @apiParam {parentDetails} [parentDetail]\n' +
-      ' * @apiParam {child[]} children\n' +
-      ' */\n'
-    );
-  });
-});
+      '\n\n## Model: parent\n' +
+      '* id: bigint\n' +
+      '* uuid: uuid\n' +
+      '* name: string\n' +
+      '* *count*: integer\n' +
+      '* category: enum\n' +
+      '* birthday: date\n' +
+      '* createdAt: date\n' +
+      '* updatedAt: date\n' +
+      '* *parentDetailsId*: bigint\n' +
+      '* [parentDetail]: [parentDetails](#model-parentDetails).\n' +
+      '* children: [child[]](#model-child).\n'
+    )
+  })
+})
 
-describe('defineJsdoc()', function() {
-  it('should create @typedef with multple @property defs', function() {
-    var doc = lib(sequelize).defineJsdoc(sequelize.models.parent);
+describe('defineJsdoc()', function () {
+  it('should create @typedef with multple @property defs', function () {
+    const doc = lib(sequelize).defineJsdoc(sequelize.models.parent)
     expect(doc).to.equal(
       '/**\n' +
       ' * @typedef {Object} Parent\n' +
@@ -184,87 +181,86 @@ describe('defineJsdoc()', function() {
       ' * @property {ParentDetails} [parentDetail]\n' +
       ' * @property {Array.<Child>} children\n' +
       ' */\n'
-    );
-  });
-});
+    )
+  })
+})
 
-describe('defineExample()', function() {
-  it('should create @apiDefine with @apiSuccessExample', function() {
-    var doc = lib(sequelize).defineExample('myObj', 'Response', {
+describe('defineExample()', function () {
+  it('should create example doc', function () {
+    const doc = lib(sequelize).defineExample('myObj', 'Response', {
       id: 1,
       name: 'string'
-    });
+    })
 
     expect(doc).to.equal(
-      '/**\n' +
-      ' * @apiDefine myObjResponse\n' +
-      ' * @apiSuccessExample {json} Response\n' +
-      ' *     {\n' +
-      ' *       "id": 1,\n' +
-      ' *       "name": "string"\n' +
-      ' *     }\n' +
-      ' */\n'
-    );
-  });
+      '\n\n' +
+      '## Example of  myObjResponse\n' +
+      '```\n' +
+      '    {\n' +
+      '      "id": 1,\n' +
+      '      "name": "string"\n' +
+      '    }\n' +
+      '```\n'
+    )
+  })
 
-  it('should create @apiDefine with an array', function() {
-    var doc = lib(sequelize).defineExample('myObj', 'Request', {
+  it('should create example doc with an array', function () {
+    const doc = lib(sequelize).defineExample('myObj', 'Request', {
       id: 1,
       name: 'string'
-    }, true);
+    }, true)
 
     expect(doc).to.equal(
-      '/**\n' +
-      ' * @apiDefine myObjArrayRequest\n' +
-      ' * @apiParamExample {json} Request\n' +
-      ' *     [\n' +
-      ' *       {\n' +
-      ' *         "id": 1,\n' +
-      ' *         "name": "string"\n' +
-      ' *       }\n' +
-      ' *     ]\n' +
-      ' */\n'
-    );
-  });
-});
+      '\n\n' +
+      '## Example of  myObjArrayRequest\n' +
+      '```\n' +
+      '    [\n' +
+      '      {\n' +
+      '        "id": 1,\n' +
+      '        "name": "string"\n' +
+      '      }\n' +
+      '    ]\n' +
+      '```\n'
+    )
+  })
+})
 
-function read(file) {
-  var filename = path.join(__dirname, file);
-  return fs.readFileSync(filename, 'utf8');
+function read (file) {
+  const filename = path.join(__dirname, file)
+  return fs.readFileSync(filename, 'utf8')
 }
-describe('defineAll()', function() {
-  it('should define all types of exampels for a specific model', function() {
-    var examples = lib(sequelize).defineAll(sequelize.models.parent);
+/* function write(file, what) {
+  var filename = path.join(__dirname, file);
+  return fs.writeFileSync(filename, what);
+} */
+describe('defineAll()', function () {
+  it('should define all types of exampels for a specific model', function () {
+    const examples = lib(sequelize).defineAll(sequelize.models.parent)
 
-    var param = read('samples/param.js');
-    var request = read('samples/request.js');
-    var requestArray = read('samples/requestArray.js');
-    var success = read('samples/success.js');
-    var successArray = read('samples/successArray.js');
+    const param = read('samples/param.md')
+    const request = read('samples/request.md')
 
-    expect(examples.param).to.equal(param);
-    expect(examples.request).to.equal(request);
-    expect(examples.requestArray).to.equal(requestArray);
-    expect(examples.success).to.equal(success);
-    expect(examples.successArray).to.equal(successArray);
+    expect(examples.param).to.equal(param)
+    expect(examples.request).to.equal(request)
 
-    expect(examples.toString()).to.be.a('string');
-  });
-});
+    expect(examples.toString()).to.be.a('string')
+  })
+})
 
-describe('auto()', function() {
-  it('should automatically generate docs for all models', function() {
-    var docs = lib(sequelize).auto();
-    expect(docs.toString()).to.equal(read('samples/auto.js'));
-  });
-  it('should respect includes', function() {
-    var docs = lib(sequelize).auto({
+describe('auto()', function () {
+  it('should automatically generate docs for all models', function () {
+    const docs = lib(sequelize).auto()
+
+    expect(docs.toString()).to.equal(read('samples/auto.md'))
+  })
+  it('should respect includes', function () {
+    const docs = lib(sequelize).auto({
       parent: {
         include: [{
           model: 'parentDetails'
         }]
       }
-    });
-    expect(docs.toString()).to.equal(read('samples/autoWithOptions.js'));
-  });
-});
+    })
+    expect(docs.toString()).to.equal(read('samples/autoWithOptions.md'))
+  })
+})

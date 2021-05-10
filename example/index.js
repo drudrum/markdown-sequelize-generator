@@ -1,29 +1,26 @@
-'use strict';
+const Sequelize = require('sequelize')
+const sequelize = new Sequelize('sqlite://')
+const gendoc = require('markdown-sequelize-generator')
 
-var Sequelize = require('sequelize');
-var sequelize = new Sequelize('sqlite://');
-// var gendoc = require('apidoc-sequelize-generator');
-var gendoc = require('../lib.js');
-
-var parent = sequelize.define('parent', {
+const parent = sequelize.define('parent', {
   name: {
     type: Sequelize.STRING,
     allowNull: false
   }
-});
+})
 
-var child = sequelize.define('child', {
+const child = sequelize.define('child', {
   name: {
-    type: Sequelize.STRING,
+    type: Sequelize.STRING
   },
   birthday: {
     type: Sequelize.DATE,
     allowNull: true
   }
-});
+})
 
-parent.hasMany(child);
+parent.hasMany(child)
 
-var docs = gendoc(sequelize).auto().toString();
+const markdownDoc = gendoc(sequelize).auto().toString()
 
-console.log(docs);
+console.log(markdownDoc)

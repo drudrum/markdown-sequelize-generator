@@ -1,4 +1,4 @@
-module.exports = function(sequelize, DataTypes) {
+module.exports = function (sequelize, DataTypes) {
   return sequelize.define('child', {
     id: {
       type: DataTypes.BIGINT,
@@ -29,5 +29,5 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     tableName: 'child',
     freezeTableName: true
-  });
-};
+  })
+}

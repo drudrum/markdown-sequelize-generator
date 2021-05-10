@@ -1,7 +1,7 @@
 {
-  "name": "apidoc-sequelize-generator",
+  "name": "markdown-sequelize-generator",
   "version": "1.0.5",
-  "description": "Automatically generates examples for apidoc from sequelize model definitions",
+  "description": "Automatically generates markdown document from sequelize model definitions",
   "main": "lib.js",
   "scripts": {
     "coverage": "istanbul cover --report text _mocha",
@@ -15,9 +15,8 @@
   },
   "keywords": [
     "sequelize",
-    "apidoc",
-    "generator",
-    "apidocjs"
+    "markdown",
+    "generator"
   ],
   "author": "Jerko Steiner",
   "license": "MIT",

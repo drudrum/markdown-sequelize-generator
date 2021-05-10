@@ -50,6 +50,7 @@ console.log(markdownDoc)
 
 ```
 
+[Result.md](example/result.md)
 This code is located in [example](example) directory.
 
 ## description of other methods
